@@ -2,6 +2,8 @@ library(GEOquery)
 library(Biobase)
 library(DESeq2)
 library(dplyr)
+library(gage)
+library(org.Mm.eg.db)
 
 gset <- getGEO("GSE162113", GSEMatrix =TRUE)
 
@@ -218,5 +220,85 @@ spleen_unicos <- setdiff(rownames(res_spleen),
 ####La red se hará con los datos de MouseNet V2
 ##https://www.inetbio.org/mousenet/
 
+datos_network <- read.delim("Raw_data/MouseNetV2_symbol.txt",
+                            header = FALSE)
+
+###Red de Heart con todos los diff exp en res_heart
+
+red_heart <- filter(datos_network,
+                    V1 %in% rownames(res_heart))
+red_heart <- filter(red_heart, V2 %in% rownames(res_heart))
+
+write.csv(red_heart,"network_heart.csv")
+
+
+
+
+
+
+#############
+#############
+#############KEGG
+
+#####Se obtendran solo aquellos genes relacionados con la respuesta inmune
+###Primero se obtendran los genes de las vias de señalizacion de kegg
+kegg_mouse <- kegg.gsets(species = "mmu", id.type = "entrez", check.new=FALSE)
+kegg_pathways <- kegg_mouse$kg.sets
+
+##Hacemos un dataframe para que sea mas facil buscar las pathways
+df_pathways <- as.data.frame(unlist(kegg_pathways))
+colnames(df_pathways) <- "Entrez"
+df_pathways$Pathway <- rownames(df_pathways)
+
+###Definimos las pathways relacionadas con la respuesta inmune,
+###estas son obtenidas de: 
+#https://www.genome.jp/kegg-bin/show_organism?menu_type=pathway_maps&org=mmu
+
+vias_inmune <- c("Hematopoietic cell lineage",
+                 "Complement and coagulation cascades",
+                 "Platelet activation",
+                 "Toll-like receptor signaling pathway",
+                 "NOD-like receptor signaling pathway",
+                 "RIG-I-like receptor signaling pathway",
+                 "Cytosolic DNA-sensing pathway",
+                 "C-type lectin receptor signaling pathway",
+                 "Natural killer cell mediated cytotoxicity",
+                 "Antigen processing and presentation",
+                 "T cell receptor signaling pathway",
+                 "Th1 and Th2 cell differentiation",
+                 "Th17 cell differentiation",
+                 "IL-17 signaling pathway",
+                 "B cell receptor signaling pathway",
+                 "Fc epsilon RI signaling pathway",
+                 "Fc gamma R-mediated phagocytosis",
+                 "Leukocyte transendothelial migration",
+                 "Intestinal immune network for IgA production",
+                 "Chemokine signaling pathway")
+
+####Filtramos y solo nos quedamos con las vias inmunes
+i <- 1
+for (i in 1:length(vias_inmune)){
+  via <- vias_inmune[i]
+  index_via <- grep(via, df_pathways$Pathway)
+  if(!exists("index_via_final")){
+    index_via_final <- index_via
+  } else {
+    index_via_final <- c(index_via_final, index_via)
+  }
+}
+
+vias_chidas <- df_pathways[index_via_final,]
+
+
+###Los genes en vias_chidas estan en ENTREZID, hay que convertirlas a 
+##symbol
+
+resultados_symbol = mapIds(org.Mm.eg.db,
+                           keys=vias_chidas$Entrez, 
+                           column="SYMBOL",#En esta opcion se selecciona que valor se quiere obtener de la conversion
+                           keytype="ENTREZID",#En esta opcion se selecciona en que formato estan los datos de origen
+                           multiVals="first")
+
+vias_chidas$SYMBOL <- resultados_symbol
 
 
