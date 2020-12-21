@@ -213,3 +213,10 @@ spleen_unicos <- setdiff(rownames(res_spleen),
                        c(rownames(res_heart),
                          rownames(res_kidney),
                          rownames(res_lung)))
+
+
+####La red se hará con los datos de MouseNet V2
+##https://www.inetbio.org/mousenet/
+
+
+
