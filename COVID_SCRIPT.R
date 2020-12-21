@@ -182,3 +182,34 @@ write.csv(res_spleen,"res_spleen.csv")
 
 ###Venn diagrams will be plotted using Venny 2.1 
 ###(https://bioinfogp.cnb.csic.es/tools/venny/)
+
+
+#####Transcritos compartidos en todos los organos
+
+t_compartidos <- Reduce(intersect, list(rownames(res_heart),
+                       rownames(res_kidney),
+                       rownames(res_lung),
+                       rownames(res_spleen)))
+
+#####Transcritos unicos de Heart
+heart_unicos <- setdiff(rownames(res_heart),
+                        c(rownames(res_kidney),
+                          rownames(res_lung),
+                          rownames(res_spleen)))
+#####Transcritos unicos de Kidney
+kidney_unicos <- setdiff(rownames(res_kidney),
+                        c(rownames(res_heart),
+                          rownames(res_lung),
+                          rownames(res_spleen)))
+
+#####Transcritos unicos de Lung
+lung_unicos <- setdiff(rownames(res_lung),
+                         c(rownames(res_heart),
+                           rownames(res_kidney),
+                           rownames(res_spleen)))
+
+#####Transcritos unicos de Spleen
+spleen_unicos <- setdiff(rownames(res_spleen),
+                       c(rownames(res_heart),
+                         rownames(res_kidney),
+                         rownames(res_lung)))
