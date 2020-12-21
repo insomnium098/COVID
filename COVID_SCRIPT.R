@@ -176,10 +176,10 @@ res_spleen <- filter(res, padj < 0.05)
 
 ####Guardar resultados de diff exp en csv
 
-write.csv(res_heart,"res_heart.csv")
-write.csv(res_kidney,"res_kidney.csv")
-write.csv(res_lung,"res_lung.csv")
-write.csv(res_spleen,"res_spleen.csv")
+write.csv(res_heart,"Diff_Exp/res_heart.csv")
+write.csv(res_kidney,"Diff_Exp/res_kidney.csv")
+write.csv(res_lung,"Diff_Exp/res_lung.csv")
+write.csv(res_spleen,"Diff_Exp/res_spleen.csv")
 
 
 ###Venn diagrams will be plotted using Venny 2.1 
@@ -229,7 +229,31 @@ red_heart <- filter(datos_network,
                     V1 %in% rownames(res_heart))
 red_heart <- filter(red_heart, V2 %in% rownames(res_heart))
 
-write.csv(red_heart,"network_heart.csv")
+write.csv(red_heart,"Networks_files/All_genes/network_heart.csv")
+
+###Red de Kidney con todos los diff exp en res_kidney
+
+red_kidney <- filter(datos_network,
+                    V1 %in% rownames(res_kidney))
+red_kidney <- filter(red_kidney, V2 %in% rownames(res_kidney))
+
+write.csv(red_kidney,"Networks_files/All_genes/network_kidney.csv")
+
+###Red de Lung con todos los diff exp en res_lung
+
+red_lung <- filter(datos_network,
+                     V1 %in% rownames(res_lung))
+red_lung <- filter(red_lung, V2 %in% rownames(res_lung))
+
+write.csv(red_lung,"Networks_files/All_genes/network_lung.csv")
+
+###Red de Spleen con todos los diff exp en res_spleen
+
+red_spleen <- filter(datos_network,
+                   V1 %in% rownames(res_spleen))
+red_spleen <- filter(red_spleen, V2 %in% rownames(res_spleen))
+
+write.csv(red_spleen,"Networks_files/All_genes/network_spleen.csv")
 
 
 
@@ -300,5 +324,49 @@ resultados_symbol = mapIds(org.Mm.eg.db,
                            multiVals="first")
 
 vias_chidas$SYMBOL <- resultados_symbol
+
+###Limpiar vias_chidas para que la pathway este bien
+
+for (i in 1:length(vias_inmune)){
+  via <- vias_inmune[i]
+  index_via_limpia <- grep(via, vias_chidas$Pathway)
+  vias_chidas[index_via_limpia,2] <- via
+}
+
+###Guardamos las vias inmunes y sus genes
+write.csv(vias_chidas,"KEGG_IMMUNE_PATHWAYS_AND_GENES.csv")
+
+#######
+######
+#####Finalmente filtramos las redes de los organos para quedarnos
+#####Solamente con genes que esten involucrados en vias inmunes
+
+red_heart_inmune <- filter(red_heart, V1 %in% vias_chidas$SYMBOL)
+colnames(red_heart_inmune) <- c("Source","Target","Score")
+####Hacemos merge con las vias chidas para saber a que via
+###pertenece cada source node
+
+##Funciona pero se hacen repetidos ya que los genes source pertenecen
+## a varias vias, de momento no se utilizara
+#test <- merge(red_heart_inmune, vias_chidas,
+#              by.x = "Source",
+#              by.y = "SYMBOL")
+
+write.csv(red_heart_inmune,"Networks_files/Only_Immune_genes/red_heart_inmune.csv")
+
+
+##
+red_kidney_inmune <- filter(red_kidney, V1 %in% vias_chidas$SYMBOL)
+colnames(red_kidney_inmune) <- c("Source","Target","Score")
+write.csv(red_kidney_inmune,"Networks_files/Only_Immune_genes/red_kidney_inmune.csv")
+##
+red_lung_inmune <- filter(red_lung, V1 %in% vias_chidas$SYMBOL)
+colnames(red_lung_inmune) <- c("Source","Target","Score")
+write.csv(red_lung_inmune,"Networks_files/Only_Immune_genes/red_lung_inmune.csv")
+##
+red_spleen_inmune <- filter(red_spleen, V1 %in% vias_chidas$SYMBOL)
+colnames(red_spleen_inmune) <- c("Source","Target","Score")
+write.csv(red_spleen_inmune,"Networks_files/Only_Immune_genes/red_spleen_inmune.csv")
+
 
 
