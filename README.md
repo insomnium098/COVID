@@ -16,7 +16,7 @@ This file includes all the immune related pathways and their corresponding genes
 from the KEGG Mus musculus database.
 
 # Network_files
-This folder includes the networks CSV files. Ther contain the Source Node, Target node
+This folder includes the networks CSV files. They contain the Source Node, Target node
 and the score of their predicted interaction.
 
 # Raw_data
