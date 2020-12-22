@@ -21,3 +21,7 @@ and the score of their predicted interaction.
 
 # Raw_data
 Contains the raw counts and the predicted network from MouseNetV2.
+
+# Webgestalt
+Contains the pathway analysis using all the genes from the differential expression
+analysis using the WebGestalt platform with the KEGG Database
