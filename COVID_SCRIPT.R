@@ -2,7 +2,6 @@ library(GEOquery)
 library(Biobase)
 library(DESeq2)
 library(dplyr)
-library(gage)
 library(org.Mm.eg.db)
 
 gset <- getGEO("GSE162113", GSEMatrix =TRUE)
@@ -300,7 +299,6 @@ vias_inmune <- c("Hematopoietic cell lineage",
                  "Chemokine signaling pathway")
 
 ####Filtramos y solo nos quedamos con las vias inmunes
-i <- 1
 for (i in 1:length(vias_inmune)){
   via <- vias_inmune[i]
   index_via <- grep(via, df_pathways$Pathway)
