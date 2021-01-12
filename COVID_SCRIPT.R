@@ -255,6 +255,15 @@ red_spleen <- filter(red_spleen, V2 %in% rownames(res_spleen))
 
 write.csv(red_spleen,"Networks_files/All_genes/network_spleen.csv")
 
+####Hacer red de los compartidos
+
+red_compartidos <- filter(datos_network,
+                          V1 %in% t_compartidos)
+red_compartidos <- filter(red_compartidos,
+                          V2 %in% t_compartidos)
+
+write.csv(red_compartidos,"Networks_files/All_genes/network_all.csv")
+
 
 
 
