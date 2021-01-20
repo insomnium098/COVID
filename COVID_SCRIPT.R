@@ -4,6 +4,7 @@ library(DESeq2)
 library(dplyr)
 library(org.Mm.eg.db)
 library(gage)
+library(cogena)
 
 gset <- getGEO("GSE162113", GSEMatrix =TRUE)
 
@@ -425,8 +426,8 @@ method <- "complete"
 index_casos <- grep("hACE2", colnames(datos_raton_dia7))
 index_controles <- grep("eGFP", colnames(datos_raton_dia7))
 
-counts_controles <- datos_raton_dia7[,index_casos]
-counts_casos <- datos_raton_dia7[,index_controles]
+counts_casos<- datos_raton_dia7[,index_casos]
+counts_controles <- datos_raton_dia7[,index_controles]
 
 
 counts_all <- as.matrix(cbind(counts_controles, counts_casos))
