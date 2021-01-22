@@ -1,6 +1,6 @@
 # COVID
 Covid project for the Systems Biology course.
-The aim of this project is drug repositioning for this disease
+The aim of this project is drug repositioning for this disease.
 # Cytoscape
 This folder contains the networks for the Heart, Lung, Kidney and Spleen.
 It is divided in two folders. "All_genes" contains the analyzed networks with
