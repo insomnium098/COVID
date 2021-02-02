@@ -68,6 +68,40 @@ aux_casos <- function(datos, tejido_origen){
 #test2 <- aux_casos(datos_raton_dia7,"Spleen")
 
 
+##########DRUG REPOSITIONING
+
+####Este analisis se hara con el paquete COGENA de bioconductor
+####Hay que tomar en cuenta que solo funcionaran aquellos genes de raton
+####que tengan un ortologo en humanos
+
+###Definimos las configuraciones globales de COGENA
+# KEGG Pathway gene set
+annoGMT <- "c2.cp.kegg.v7.01.symbols.gmt.xz"
+# GO biological process gene set
+# annoGMT <- "c5.bp.v7.0.symbols.gmt.xz"
+annofile <- system.file("extdata", annoGMT, package="cogena")
+# the number of clusters. It can be a vector.
+# nClust <- 2:20
+nClust <- 10
+
+# the number of cores.
+# ncore <- 8
+ncore <- 6
+# the clustering methods
+# clMethods <- c("hierarchical","kmeans","diana","fanny","som","model",
+# "sota","pam","clara","agnes") # All the methods can be used together.
+clMethods <- c("hierarchical","kmeans")
+# the distance metric
+metric <- "correlation"
+# the agglomeration method used for hierarchical clustering
+# (hierarchical and agnes)
+method <- "complete"
+
+
+
+#######
+
+
 ####Diff exp between organs
 
 #########Heart
@@ -119,6 +153,57 @@ res <- as.data.frame(results(dds))
 res_kidney <- filter(res, padj < 0.05)
 
 
+
+counts_kidney <- counts [rownames(counts) %in% rownames(res_kidney),]
+
+###Hacemos los rownames en mayusculas
+
+rownames(counts_kidney) <- toupper(rownames(counts_kidney))
+
+###Hacer samplelabels para el drug repositioning
+names_control <- colnames(controles)
+label_control <- rep("control",length(colnames(controles)))
+names(label_control) <- names_control
+
+
+
+names_casos <- colnames(casos)
+label_casos <- rep("COVID",length(casos))
+names(label_casos) <- names_casos
+
+sample_labels <- c(label_control,label_casos)
+
+# Making factor "DISEASE" behind factor "ct" means DISEASE Vs Control
+# is up-regualted
+sample_labels <- factor(sample_labels, levels=c("control", "COVID"))
+
+# Co-expression Analysis
+genecl_result <- coExp(counts_kidney, nClust=nClust,
+                       clMethods=clMethods,
+                       metric=metric, 
+                       method=method, 
+                       ncore=ncore)
+
+# Enrichment (Pathway) analysis for the co-expressed genes
+clen_res <- clEnrich(genecl_result, 
+                     annofile=annofile, 
+                     sampleLabel=sample_labels)
+
+enrichment.table <- enrichment(clen_res, "kmeans", "10")
+
+pdf("HEATMAP_KIDNEY.pdf")
+heatmapCluster(clen_res, "kmeans", "10", maintitle="COVID-Riñon")
+dev.off()
+###Drug repositioning
+
+cmapDn100_cogena_result <- clEnrich(genecl_result,
+                                    annofile=system.file("extdata", "CmapDn100.gmt.xz", package="cogena"),
+                                    sampleLabel=sample_labels)
+
+###MultiInstance
+heatmapCmap(cmapDn100_cogena_result, "kmeans", "10", printGS=FALSE,
+            orderMethod = "max", maintitle="Reposicionamiento de fármacos en COVID para riñon")
+
 ####################END Kidney
 ####################
 ####################
@@ -143,6 +228,62 @@ dds <- DESeq(dds, parallel = TRUE)
 ####Obtener todos los resultados y quedarse solo con los significativos
 res <- as.data.frame(results(dds))
 res_lung <- filter(res, padj < 0.05)
+
+
+
+
+
+
+
+counts_lung <- counts [rownames(counts) %in% rownames(res_lung),]
+
+###Hacemos los rownames en mayusculas
+
+rownames(counts_lung) <- toupper(rownames(counts_lung))
+
+###Hacer samplelabels para el drug repositioning
+names_control <- colnames(controles)
+label_control <- rep("control",length(colnames(controles)))
+names(label_control) <- names_control
+
+
+
+names_casos <- colnames(casos)
+label_casos <- rep("COVID",length(casos))
+names(label_casos) <- names_casos
+
+sample_labels <- c(label_control,label_casos)
+
+# Making factor "DISEASE" behind factor "ct" means DISEASE Vs Control
+# is up-regualted
+sample_labels <- factor(sample_labels, levels=c("control", "COVID"))
+
+# Co-expression Analysis
+genecl_result <- coExp(counts_lung, nClust=nClust,
+                       clMethods=clMethods,
+                       metric=metric, 
+                       method=method, 
+                       ncore=ncore)
+
+# Enrichment (Pathway) analysis for the co-expressed genes
+clen_res <- clEnrich(genecl_result, 
+                     annofile=annofile, 
+                     sampleLabel=sample_labels)
+
+enrichment.table <- enrichment(clen_res, "kmeans", "10")
+
+pdf("HEATMAP_LUNG.pdf")
+heatmapCluster(clen_res, "kmeans", "10", maintitle="COVID-Pulmón")
+dev.off()
+###Drug repositioning
+
+cmapDn100_cogena_result <- clEnrich(genecl_result,
+                                    annofile=system.file("extdata", "CmapDn100.gmt.xz", package="cogena"),
+                                    sampleLabel=sample_labels)
+
+###MultiInstance
+heatmapCmap(cmapDn100_cogena_result, "kmeans", "10", printGS=FALSE,
+            orderMethod = "max", maintitle="Reposicionamiento de fármacos en COVID para pulmón")
 
 
 ####################END Lung
@@ -511,6 +652,4 @@ cmapDn100_cogena_result <- clEnrich(genecl_result,
 ###MultiInstance
 heatmapCmap(cmapDn100_cogena_result, "kmeans", "10", printGS=FALSE,
             orderMethod = "max", maintitle="Drug repositioning for COVID")
-
-
 
